@@ -1,5 +1,6 @@
 "use client";
 
+import { useUploadStore } from "@/stores/uploadStore";
 import { useRouter } from "next/navigation";
 import styles from "./page.module.scss";
 import Button from "@/components/common/Button/Button";
@@ -7,9 +8,11 @@ import Card from "@/components/common/Card/Card";
 
 export default function Home() {
   const router = useRouter();
+  const setHasStarted = useUploadStore((state) => state.setHasStarted);
 
   const handleStart = () => {
-    router.push("/upload");
+    setHasStarted(true);
+    router.push("/workspace");
   };
 
   return (
