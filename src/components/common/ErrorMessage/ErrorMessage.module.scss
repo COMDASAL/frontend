@@ -1,0 +1,10 @@
+@use "../../../styles/variables" as *;
+
+.error {
+  color: $color-error;
+  font-size: 14px;
+  margin-top: $spacing-sm;
+  display: flex;
+  align-items: center;
+  font-weight: 500;
+}
