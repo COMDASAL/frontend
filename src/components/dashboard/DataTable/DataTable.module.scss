@@ -1,0 +1,58 @@
+@use "../../../styles/variables" as *;
+
+.tableContainer {
+  overflow-x: auto;
+  border-radius: $border-radius-md;
+  border: 1px solid $color-border;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: $color-surface;
+
+  th,
+  td {
+    padding: 16px;
+    text-align: left;
+    border-bottom: 1px solid $color-border;
+    font-size: 14px;
+  }
+
+  th {
+    background-color: rgba($color-primary, 0.03);
+    color: $color-text-sub;
+    font-weight: 600;
+  }
+
+  tbody tr:hover {
+    background-color: #f9fafb;
+  }
+}
+
+.bold {
+  font-weight: bold;
+  color: $color-text-main;
+}
+
+.rank {
+  font-weight: 800;
+  color: $color-primary;
+}
+
+.score {
+  font-family: monospace;
+  font-size: 15px;
+}
+
+.changed {
+  color: $color-warning;
+  font-weight: bold;
+  background-color: rgba($color-warning, 0.1);
+  padding: 2px 8px;
+  border-radius: 12px;
+}
+
+.same {
+  color: $color-text-sub;
+}
