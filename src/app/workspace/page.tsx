@@ -12,7 +12,13 @@ import ValidationItem, {
 import AnalysisProgress from "@/components/analysis/AnalysisProgress/AnalysisProgress";
 import { useUploadStore } from "@/stores/uploadStore";
 
-type WorkspaceStep = "UPLOAD" | "VALIDATING" | "ANALYZING";
+import DataTable, {
+  StationData,
+} from "@/components/dashboard/DataTable/DataTable";
+import DownloadPanel from "@/components/dashboard/DownloadPanel/DownloadPanel";
+import Toast from "@/components/common/Toast/Toast";
+
+type WorkspaceStep = "UPLOAD" | "VALIDATING" | "ANALYZING" | "RESULT";
 
 const INITIAL_VALIDATIONS: ValidationItemType[] = [
   {
@@ -56,6 +62,10 @@ export default function WorkspacePage() {
   const [isAnalysisComplete, setIsAnalysisComplete] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
 
+  const [resultData, setResultData] = useState<StationData[]>([]);
+  const [isDownloading, setIsDownloading] = useState(false);
+  const [showToast, setShowToast] = useState(false);
+
   useEffect(() => {
     setIsMounted(true);
     if (!hasStarted) {
@@ -63,48 +73,20 @@ export default function WorkspacePage() {
     }
   }, [hasStarted, router]);
 
-  if (!isMounted || !hasStarted) {
-    return null;
-  }
+  if (!isMounted || !hasStarted) return null;
 
   const handleStartValidation = async () => {
     if (!isReadyToValidate()) return;
-
     setStep("VALIDATING");
     setIsValidating(true);
 
-    const formData = new FormData();
-    if (internalFile) formData.append("internalFile", internalFile);
-    if (externalFile) formData.append("externalFile", externalFile);
-
     try {
       await new Promise((resolve) => setTimeout(resolve, 1500));
-      const isSuccess = true;
-
-      if (isSuccess) {
-        setValidations((prev) =>
-          prev.map((v) => ({ ...v, status: "success" })),
-        );
-        setIsValidating(false);
-
-        setTimeout(() => {
-          setStep("ANALYZING");
-        }, 800);
-      } else {
-        setValidations((prev) => {
-          const updated = [...prev];
-          updated[2] = {
-            ...updated[2],
-            status: "error",
-            guide:
-              "3행 4열의 '승하차 인원' 데이터가 누락되었습니다. 파일을 수정 후 다시 시도해 주세요.",
-          };
-          return updated;
-        });
-        setIsValidating(false);
-      }
+      setValidations((prev) => prev.map((v) => ({ ...v, status: "success" })));
+      setIsValidating(false);
+      setTimeout(() => setStep("ANALYZING"), 800);
     } catch (error) {
-      console.error("검증 요청 중 오류 발생:", error);
+      console.error("검증 오류:", error);
       setIsValidating(false);
     }
   };
@@ -114,12 +96,77 @@ export default function WorkspacePage() {
     setStep("UPLOAD");
   };
 
-  const handleGoToDashboard = () => {
-    router.push("/dashboard");
+  const handleShowResult = () => {
+    setStep("RESULT");
+    const mockData: StationData[] = [
+      {
+        id: 1,
+        rank: 1,
+        stationName: "고속터미널",
+        line: "3호선",
+        currentGrade: "2급지",
+        predictedGrade: "1급지",
+        score: 98.42,
+      },
+      {
+        id: 2,
+        rank: 2,
+        stationName: "홍대입구",
+        line: "2호선",
+        currentGrade: "1급지",
+        predictedGrade: "1급지",
+        score: 97.15,
+      },
+      {
+        id: 3,
+        rank: 3,
+        stationName: "강남",
+        line: "2호선",
+        currentGrade: "1급지",
+        predictedGrade: "1급지",
+        score: 96.88,
+      },
+      {
+        id: 4,
+        rank: 4,
+        stationName: "신도림",
+        line: "2호선",
+        currentGrade: "2급지",
+        predictedGrade: "1급지",
+        score: 92.05,
+      },
+      {
+        id: 5,
+        rank: 5,
+        stationName: "사당",
+        line: "4호선",
+        currentGrade: "2급지",
+        predictedGrade: "2급지",
+        score: 89.31,
+      },
+    ];
+    setResultData(mockData);
+  };
+
+  const handleDownload = async () => {
+    setIsDownloading(true);
+    await new Promise((resolve) => setTimeout(resolve, 1500));
+    setIsDownloading(false);
+    setShowToast(true);
+  };
+
+  const handleRestart = () => {
+    setStep("UPLOAD");
+    setInternalFile(null);
+    setExternalFile(null);
+    setValidations(INITIAL_VALIDATIONS);
+    setIsAnalysisComplete(false);
+    setResultData([]);
   };
 
   return (
     <main className={styles.container}>
+      {/* 1. UPLOAD 단계 */}
       {step === "UPLOAD" && (
         <>
           <div className={styles.header}>
@@ -128,7 +175,6 @@ export default function WorkspacePage() {
               분석에 필요한 내부데이터와 외부데이터 엑셀 파일을 업로드해주세요.
             </p>
           </div>
-
           <div className={styles.uploadSection}>
             <FileDropzone
               title="내부데이터 (Excel)"
@@ -143,7 +189,6 @@ export default function WorkspacePage() {
               onRemoveFile={() => setExternalFile(null)}
             />
           </div>
-
           <div className={styles.actionSection}>
             <Button
               onClick={handleStartValidation}
@@ -155,6 +200,7 @@ export default function WorkspacePage() {
         </>
       )}
 
+      {/* 2. VALIDATING 단계 */}
       {step === "VALIDATING" && (
         <>
           <div className={styles.header}>
@@ -164,13 +210,11 @@ export default function WorkspacePage() {
               검증하고 있습니다.
             </p>
           </div>
-
           <div className={styles.validationList}>
             {validations.map((item) => (
               <ValidationItem key={item.id} item={item} />
             ))}
           </div>
-
           <div className={styles.actionSection}>
             {validations.some((v) => v.status === "error") ? (
               <Button onClick={handleReset}>다시 업로드하기</Button>
@@ -186,6 +230,7 @@ export default function WorkspacePage() {
         </>
       )}
 
+      {/* 3. ANALYZING 단계 */}
       {step === "ANALYZING" && (
         <>
           <div className={styles.header}>
@@ -195,19 +240,51 @@ export default function WorkspacePage() {
               벗어나지 마세요.
             </p>
           </div>
-
           <AnalysisProgress onComplete={() => setIsAnalysisComplete(true)} />
-
           <div className={styles.actionSection}>
-            <Button
-              onClick={handleGoToDashboard}
-              disabled={!isAnalysisComplete}
-            >
-              {isAnalysisComplete ? "결과 대시보드로 이동" : "분석 진행 중..."}
+            <Button onClick={handleShowResult} disabled={!isAnalysisComplete}>
+              {isAnalysisComplete
+                ? "결과 대시보드 확인하기"
+                : "분석 진행 중..."}
             </Button>
           </div>
         </>
       )}
+
+      {/* 4. RESULT 단계 */}
+      {step === "RESULT" && (
+        <>
+          <div className={styles.header}>
+            <h1 className={styles.title}>AI 분석 결과 대시보드</h1>
+            <p className={styles.description}>
+              역별 승하차, 환승 데이터, 상권 피처를 종합하여 예측한 역급지 조정
+              결과입니다.
+            </p>
+          </div>
+
+          <div className={styles.resultCard}>
+            <h2 className={styles.resultCardTitle}>
+              역별 AI 예측 급지 랭킹 Top 5
+            </h2>
+            <DataTable data={resultData} />
+          </div>
+
+          <DownloadPanel
+            onDownload={handleDownload}
+            isDownloading={isDownloading}
+          />
+
+          <div className={styles.actionSection} style={{ marginTop: "24px" }}>
+            <Button onClick={handleRestart}>새로운 데이터 분석하기</Button>
+          </div>
+        </>
+      )}
+
+      <Toast
+        message="결과 리포트(.xlsx)가 성공적으로 다운로드되었습니다."
+        isVisible={showToast}
+        onClose={() => setShowToast(false)}
+      />
     </main>
   );
 }
