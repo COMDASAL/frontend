@@ -1,0 +1,10 @@
+@use "../../../styles/variables" as *;
+
+.container {
+  background-color: $color-surface;
+  border: 1px solid $color-border;
+  border-radius: $border-radius-md;
+  padding: $spacing-lg;
+  margin-bottom: $spacing-xl;
+  box-shadow: $shadow-sm;
+}

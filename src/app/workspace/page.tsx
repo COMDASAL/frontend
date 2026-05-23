@@ -1,16 +1,18 @@
 "use client";
 
-import { useState, useEffect } from "react"; // 👉 useEffect 추가
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import styles from "./page.module.scss";
+
 import Button from "@/components/common/Button/Button";
 import FileDropzone from "@/components/upload/FileDropzone/FileDropzone";
 import ValidationItem, {
   ValidationItemType,
 } from "@/components/validation/ValidationItem/ValidationItem";
+import AnalysisProgress from "@/components/analysis/AnalysisProgress/AnalysisProgress";
 import { useUploadStore } from "@/stores/uploadStore";
 
-type UploadStep = "UPLOAD" | "VALIDATING";
+type WorkspaceStep = "UPLOAD" | "VALIDATING" | "ANALYZING";
 
 const INITIAL_VALIDATIONS: ValidationItemType[] = [
   {
@@ -35,23 +37,24 @@ const INITIAL_VALIDATIONS: ValidationItemType[] = [
   },
 ];
 
-export default function UploadPage() {
+export default function WorkspacePage() {
   const router = useRouter();
-  const [step, setStep] = useState<UploadStep>("UPLOAD");
-  const [validations, setValidations] =
-    useState<ValidationItemType[]>(INITIAL_VALIDATIONS);
-  const [isValidating, setIsValidating] = useState(false);
-
-  const [isMounted, setIsMounted] = useState(false);
 
   const {
+    hasStarted,
     internalFile,
     externalFile,
-    hasStarted,
     setInternalFile,
     setExternalFile,
     isReadyToValidate,
   } = useUploadStore();
+
+  const [step, setStep] = useState<WorkspaceStep>("UPLOAD");
+  const [validations, setValidations] =
+    useState<ValidationItemType[]>(INITIAL_VALIDATIONS);
+  const [isValidating, setIsValidating] = useState(false);
+  const [isAnalysisComplete, setIsAnalysisComplete] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
     setIsMounted(true);
@@ -60,24 +63,22 @@ export default function UploadPage() {
     }
   }, [hasStarted, router]);
 
-  // 백엔드 API 연동 핸들러
+  if (!isMounted || !hasStarted) {
+    return null;
+  }
+
   const handleStartValidation = async () => {
     if (!isReadyToValidate()) return;
 
-    // 1. 검증 화면(Step)으로 전환 및 로딩 시작
     setStep("VALIDATING");
     setIsValidating(true);
 
-    // 2. Multipart/form-data 객체 생성
     const formData = new FormData();
     if (internalFile) formData.append("internalFile", internalFile);
     if (externalFile) formData.append("externalFile", externalFile);
 
     try {
-      // Mock 연출을 위해 임시로 1.5초 대기 (실제 연동 시 제거)
       await new Promise((resolve) => setTimeout(resolve, 1500));
-
-      // [임시] 모의 통신 성공 처리
       const isSuccess = true;
 
       if (isSuccess) {
@@ -85,6 +86,10 @@ export default function UploadPage() {
           prev.map((v) => ({ ...v, status: "success" })),
         );
         setIsValidating(false);
+
+        setTimeout(() => {
+          setStep("ANALYZING");
+        }, 800);
       } else {
         setValidations((prev) => {
           const updated = [...prev];
@@ -104,22 +109,17 @@ export default function UploadPage() {
     }
   };
 
-  const handleGoToAnalysis = () => {
-    router.push("/analysis");
-  };
-
   const handleReset = () => {
     setValidations(INITIAL_VALIDATIONS);
     setStep("UPLOAD");
   };
 
-  if (!isMounted || !hasStarted) {
-    return null;
-  }
+  const handleGoToDashboard = () => {
+    router.push("/dashboard");
+  };
 
   return (
     <main className={styles.container}>
-      {/* ... 기존 렌더링 코드 동일 ... */}
       {step === "UPLOAD" && (
         <>
           <div className={styles.header}>
@@ -175,10 +175,36 @@ export default function UploadPage() {
             {validations.some((v) => v.status === "error") ? (
               <Button onClick={handleReset}>다시 업로드하기</Button>
             ) : (
-              <Button onClick={handleGoToAnalysis} disabled={isValidating}>
+              <Button
+                onClick={() => setStep("ANALYZING")}
+                disabled={isValidating}
+              >
                 {isValidating ? "데이터 검증 중..." : "AI 분석 시작하기"}
               </Button>
             )}
+          </div>
+        </>
+      )}
+
+      {step === "ANALYZING" && (
+        <>
+          <div className={styles.header}>
+            <h1 className={styles.title}>AI 데이터 분석 진행 중</h1>
+            <p className={styles.description}>
+              데이터를 기반으로 최적의 역급지를 연산하고 있습니다. 페이지를
+              벗어나지 마세요.
+            </p>
+          </div>
+
+          <AnalysisProgress onComplete={() => setIsAnalysisComplete(true)} />
+
+          <div className={styles.actionSection}>
+            <Button
+              onClick={handleGoToDashboard}
+              disabled={!isAnalysisComplete}
+            >
+              {isAnalysisComplete ? "결과 대시보드로 이동" : "분석 진행 중..."}
+            </Button>
           </div>
         </>
       )}
