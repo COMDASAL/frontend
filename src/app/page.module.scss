@@ -1,0 +1,59 @@
+@use "../styles/variables" as *;
+
+.container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: $spacing-lg;
+  background-color: $color-background;
+}
+
+.hero {
+  text-align: center;
+  background-color: $color-surface;
+  padding: 60px 40px;
+  border-radius: $border-radius-lg;
+  box-shadow: $shadow-md;
+  max-width: 900px;
+  width: 100%;
+}
+
+.title {
+  color: $color-primary;
+  font-size: 32px;
+  margin-bottom: $spacing-sm;
+  font-weight: 700;
+}
+
+.description {
+  color: $color-text-sub;
+  font-size: 16px;
+  margin-bottom: 40px;
+  line-height: 1.6;
+}
+
+.cardGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: $spacing-md;
+  margin-bottom: 40px;
+  text-align: left; // 카드 내부 텍스트는 왼쪽 정렬
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.cardInner {
+  .icon {
+    font-size: 24px;
+    margin-bottom: $spacing-sm;
+  }
+
+  p {
+    font-size: 14px;
+    color: $color-text-sub;
+    line-height: 1.5;
+  }
+}
