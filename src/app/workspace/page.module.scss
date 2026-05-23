@@ -23,10 +23,18 @@
   font-size: 16px;
 }
 
+// 1단계 업로드 레이아웃
 .uploadSection {
   display: flex;
   flex-direction: column;
   gap: $spacing-lg;
+  margin-bottom: $spacing-xl;
+}
+
+// 2단계 검증 레이아웃
+.validationList {
+  display: flex;
+  flex-direction: column;
   margin-bottom: $spacing-xl;
 }
 

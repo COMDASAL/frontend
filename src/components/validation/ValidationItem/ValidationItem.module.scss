@@ -1,0 +1,48 @@
+@use "../../../styles/variables" as *;
+
+.container {
+  padding: $spacing-md $spacing-lg;
+  border: 1px solid $color-border;
+  border-radius: $border-radius-md;
+  background-color: $color-surface;
+  transition: all 0.3s ease;
+  margin-bottom: $spacing-sm;
+
+  &.success {
+    border-color: rgba(#10b981, 0.3);
+  }
+
+  &.error {
+    border-color: rgba($color-error, 0.3);
+    background-color: rgba($color-error, 0.02);
+  }
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.title {
+  font-size: 16px;
+  font-weight: 600;
+  color: $color-text-main;
+}
+
+.description {
+  font-size: 14px;
+  color: $color-text-sub;
+}
+
+.guideWrapper {
+  margin-top: $spacing-md;
+  padding-top: $spacing-sm;
+  border-top: 1px dashed $color-border;
+}
