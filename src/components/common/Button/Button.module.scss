@@ -1,0 +1,17 @@
+@use "../../../styles/variables" as *;
+
+.button {
+  padding: $spacing-md 48px;
+  font-size: 18px;
+  font-weight: bold;
+  color: $color-surface;
+  background-color: $color-primary;
+  border: none;
+  border-radius: $border-radius-md;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+
+  &:hover {
+    background-color: $color-primary-hover;
+  }
+}
