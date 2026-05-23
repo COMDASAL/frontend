@@ -1,0 +1,30 @@
+@use "../../../styles/variables" as *;
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.success {
+  background-color: rgba(#10b981, 0.1);
+  color: #10b981;
+}
+
+.error {
+  background-color: rgba($color-error, 0.1);
+  color: $color-error;
+}
+
+.pending {
+  background-color: rgba($color-text-sub, 0.1);
+  color: $color-text-sub;
+}
+
+.emoji {
+  font-size: 14px;
+}
