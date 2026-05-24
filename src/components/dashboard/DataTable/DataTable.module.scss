@@ -1,0 +1,90 @@
+@use "../../../styles/variables" as *;
+
+.tableContainer {
+  overflow-x: auto;
+  overflow-y: auto;
+  max-height: 500px; // 전체 데이터를 보여주되, 스크롤을 생성하여 화면이 길어지는 것 방지
+  border-radius: $border-radius-md;
+  border: 1px solid $color-border;
+
+  /* 스크롤바 커스텀 */
+  &::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background-color: #cbd5e1;
+    border-radius: 4px;
+  }
+  &::-webkit-scrollbar-track {
+    background-color: transparent;
+  }
+}
+
+.table {
+  width: 100%;
+  border-collapse: separate; // sticky 헤더 사용을 위해 separate 적용
+  border-spacing: 0;
+  background-color: $color-surface;
+
+  th,
+  td {
+    padding: 14px 16px;
+    text-align: left;
+    border-bottom: 1px solid $color-border;
+    font-size: 14px;
+    white-space: nowrap; // 기본적으로 줄바꿈 방지
+  }
+
+  th {
+    position: sticky;
+    top: 0;
+    background-color: #f3f4f6; // 스크롤 시 텍스트 겹침 방지용 불투명 배경
+    color: $color-text-sub;
+    font-weight: 600;
+    z-index: 10;
+    box-shadow: 0 1px 0 $color-border; // border-bottom 대신 그림자로 선 표현
+  }
+
+  tbody tr:hover {
+    background-color: rgba($color-primary, 0.02);
+  }
+}
+
+.centerAlign {
+  text-align: center !important;
+}
+
+.bold {
+  font-weight: bold;
+  color: $color-text-main;
+}
+
+.rank {
+  font-weight: 800;
+  color: $color-primary;
+}
+
+.score {
+  font-family: monospace;
+  font-size: 15px;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.typeBadge {
+  background-color: #e2e8f0;
+  color: #475569;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.factors {
+  color: $color-text-sub;
+  font-size: 13px;
+  white-space: normal !important; // 기여 요인은 길 수 있으므로 줄바꿈 허용
+  min-width: 300px;
+  line-height: 1.5;
+}
