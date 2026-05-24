@@ -77,16 +77,42 @@ export default function WorkspacePage() {
 
   const handleStartValidation = async () => {
     if (!isReadyToValidate()) return;
+
     setStep("VALIDATING");
     setIsValidating(true);
 
+    const formData = new FormData();
+    if (internalFile) formData.append("internalFile", internalFile);
+    if (externalFile) formData.append("externalFile", externalFile);
+
     try {
       await new Promise((resolve) => setTimeout(resolve, 1500));
-      setValidations((prev) => prev.map((v) => ({ ...v, status: "success" })));
-      setIsValidating(false);
-      setTimeout(() => setStep("ANALYZING"), 800);
+      const isSuccess = true;
+
+      if (isSuccess) {
+        setValidations((prev) =>
+          prev.map((v) => ({ ...v, status: "success" })),
+        );
+        setIsValidating(false);
+
+        setTimeout(() => {
+          setStep("ANALYZING");
+        }, 800);
+      } else {
+        setValidations((prev) => {
+          const updated = [...prev];
+          updated[2] = {
+            ...updated[2],
+            status: "error",
+            guide:
+              "3행 4열의 '승하차 인원' 데이터가 누락되었습니다. 파일을 수정 후 다시 시도해 주세요.",
+          };
+          return updated;
+        });
+        setIsValidating(false);
+      }
     } catch (error) {
-      console.error("검증 오류:", error);
+      console.error("검증 요청 중 오류 발생:", error);
       setIsValidating(false);
     }
   };
@@ -100,49 +126,93 @@ export default function WorkspacePage() {
     setStep("RESULT");
     const mockData: StationData[] = [
       {
-        id: 1,
+        id: "1",
         rank: 1,
-        stationName: "고속터미널",
-        line: "3호선",
-        currentGrade: "2급지",
-        predictedGrade: "1급지",
-        score: 98.42,
-      },
-      {
-        id: 2,
-        rank: 2,
-        stationName: "홍대입구",
-        line: "2호선",
-        currentGrade: "1급지",
-        predictedGrade: "1급지",
-        score: 97.15,
-      },
-      {
-        id: 3,
-        rank: 3,
-        stationName: "강남",
-        line: "2호선",
-        currentGrade: "1급지",
-        predictedGrade: "1급지",
-        score: 96.88,
-      },
-      {
-        id: 4,
-        rank: 4,
-        stationName: "신도림",
-        line: "2호선",
-        currentGrade: "2급지",
-        predictedGrade: "1급지",
-        score: 92.05,
-      },
-      {
-        id: 5,
-        rank: 5,
-        stationName: "사당",
+        SWST_NM: "명동",
         line: "4호선",
-        currentGrade: "2급지",
-        predictedGrade: "2급지",
-        score: 89.31,
+        score: 100,
+        type: "정규",
+        mainFactors:
+          "일평균 승하차 높음 (+1.7), 외국어 응대 비중 높음 (+0.3), 출퇴근 노인 집중 (+0.1)",
+      },
+      {
+        id: "2",
+        rank: 2,
+        SWST_NM: "서울",
+        line: "1호선",
+        score: 99.28,
+        type: "정규",
+        mainFactors:
+          "일평균 승하차 높음 (+1.7), 외국어 응대 비중 높음 (+0.3), 출퇴근 노인 집중 (+0.1)",
+      },
+      {
+        id: "3",
+        rank: 3,
+        SWST_NM: "홍대입구",
+        line: "2호선",
+        score: 99.05,
+        type: "정규",
+        mainFactors:
+          "일평균 승하차 높음 (+1.8), 외국어 응대 비중 높음 (+0.4), 부하 변동성 높음",
+      },
+      {
+        id: "250",
+        rank: 250,
+        SWST_NM: "하남풍산",
+        line: "5호선",
+        score: 17.6,
+        type: "정규",
+        mainFactors:
+          "일평균 승하차 낮음 (-1.9), 우대권 응대 비중 높음 (+0.1), 부하 변동성 높음 (+0.1)",
+      },
+      {
+        id: "251",
+        rank: 251,
+        SWST_NM: "용두",
+        line: "2호선",
+        score: 16.78,
+        type: "정규",
+        mainFactors:
+          "일평균 승하차 낮음 (-2.0), 우대권 응대 비중 높음 (+0.3), 출퇴근 노인 집중 (+0.1)",
+      },
+      {
+        id: "252",
+        rank: 252,
+        SWST_NM: "무악재",
+        line: "3호선",
+        score: 16.54,
+        type: "정규",
+        mainFactors:
+          "일평균 승하차 낮음 (-1.9), 우대권 응대 비중 높음 (+0.1), 외국어 응대 비중 낮음 (-0.0)",
+      },
+      {
+        id: "253",
+        rank: 253,
+        SWST_NM: "동대문역사문화공원",
+        line: "5호선",
+        score: 15.75,
+        type: "정규",
+        mainFactors:
+          "일평균 승하차 낮음 (-2.0), 외국어 응대 비중 높음 (+0.2), 우대권 응대 비중 낮음 (-0.1)",
+      },
+      {
+        id: "254",
+        rank: 254,
+        SWST_NM: "충정로",
+        line: "5호선",
+        score: 13.67,
+        type: "정규",
+        mainFactors:
+          "일평균 승하차 낮음 (-1.9), 부하 변동성 낮음 (-0.1), 우대권 응대 비중 낮음 (-0.0)",
+      },
+      {
+        id: "266",
+        rank: 266,
+        SWST_NM: "장암",
+        line: "7호선",
+        score: 2.11,
+        type: "정규",
+        mainFactors: "일평균 승하차 매우 낮음 (-2.5), 주요 시설 부재",
       },
     ];
     setResultData(mockData);
@@ -166,7 +236,6 @@ export default function WorkspacePage() {
 
   return (
     <main className={styles.container}>
-      {/* 1. UPLOAD 단계 */}
       {step === "UPLOAD" && (
         <>
           <div className={styles.header}>
@@ -200,7 +269,6 @@ export default function WorkspacePage() {
         </>
       )}
 
-      {/* 2. VALIDATING 단계 */}
       {step === "VALIDATING" && (
         <>
           <div className={styles.header}>
@@ -230,7 +298,6 @@ export default function WorkspacePage() {
         </>
       )}
 
-      {/* 3. ANALYZING 단계 */}
       {step === "ANALYZING" && (
         <>
           <div className={styles.header}>
@@ -251,20 +318,19 @@ export default function WorkspacePage() {
         </>
       )}
 
-      {/* 4. RESULT 단계 */}
       {step === "RESULT" && (
         <>
           <div className={styles.header}>
             <h1 className={styles.title}>AI 분석 결과 대시보드</h1>
             <p className={styles.description}>
-              역별 승하차, 환승 데이터, 상권 피처를 종합하여 예측한 역급지 조정
-              결과입니다.
+              업로드하신 데이터를 바탕으로 산출된 전체 역사 AI 예측 스코어 및
+              기여 요인입니다.
             </p>
           </div>
 
           <div className={styles.resultCard}>
             <h2 className={styles.resultCardTitle}>
-              역별 AI 예측 급지 랭킹 Top 5
+              전체 역사 AI 분석 종합 결과
             </h2>
             <DataTable data={resultData} />
           </div>
